@@ -3,7 +3,7 @@
 }
 
 .menuBar {
-  @apply flex items-center justify-between px-4 py-1 bg-white;
+  @apply flex items-center justify-between px-4 py-3 bg-white;
 }
 
 .menuItems {

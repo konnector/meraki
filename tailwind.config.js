@@ -2,9 +2,19 @@
 module.exports = {
     darkMode: ["class"],
     content: [
-    "./src/**/*.{js,ts,jsx,tsx}",
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
   ],
   theme: {
+  	container: {
+  		center: true,
+  		padding: "2rem",
+  		screens: {
+  			"2xl": "1400px",
+  		},
+  	},
   	extend: {
   		colors: {
   			'color-1': 'hsl(var(--color-1))',
@@ -19,7 +29,8 @@ module.exports = {
   			foreground: 'hsl(var(--foreground))',
   			primary: {
   				DEFAULT: 'hsl(var(--primary))',
-  				foreground: 'hsl(var(--primary-foreground))'
+  				foreground: 'hsl(var(--primary-foreground))',
+  				50: '#f0f6ff',
   			},
   			secondary: {
   				DEFAULT: 'hsl(var(--secondary))',
@@ -47,7 +58,9 @@ module.exports = {
   			}
   		},
   		animation: {
-  			rainbow: 'rainbow var(--speed, 2s) infinite linear'
+  			rainbow: 'rainbow var(--speed, 2s) infinite linear',
+  			"accordion-down": "accordion-down 0.2s ease-out",
+  			"accordion-up": "accordion-up 0.2s ease-out",
   		},
   		keyframes: {
   			rainbow: {
@@ -57,7 +70,15 @@ module.exports = {
   				'100%': {
   					'background-position': '200%'
   				}
-  			}
+  			},
+  			"accordion-down": {
+  				from: { height: 0 },
+  				to: { height: "var(--radix-accordion-content-height)" },
+  			},
+  			"accordion-up": {
+  				from: { height: "var(--radix-accordion-content-height)" },
+  				to: { height: 0 },
+  			},
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
@@ -66,5 +87,5 @@ module.exports = {
   		}
   	}
   },
-  plugins: [],
+  plugins: [require("tailwindcss-animate")],
 }
