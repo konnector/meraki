@@ -16,6 +16,7 @@ import {
   DollarSign,
   Calendar
 } from 'lucide-react';
+import { ShareDialog } from './ShareDialog';
 
 interface ToolbarProps {
   selectedCell: CellPosition | null;
@@ -41,6 +42,7 @@ export default function Toolbar({
   const [numberFormatOpen, setNumberFormatOpen] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(100);
   const [zoomOpen, setZoomOpen] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -482,12 +484,16 @@ export default function Toolbar({
         {/* Keep the original Share button */}
         <div className="flex items-center pl-4">
           <RainbowButton 
-            onClick={() => {}} 
+            onClick={() => setShareDialogOpen(true)}
             className="h-8 px-5 rounded-lg text-sm font-medium bg-opacity-90 dark:text-white hover:opacity-90 transition-opacity"
           >
             <Share2 className="w-3.5 h-3.5 mr-2" />
             Share
           </RainbowButton>
+          <ShareDialog 
+            open={shareDialogOpen} 
+            onOpenChange={setShareDialogOpen}
+          />
         </div>
       </div>
     </div>

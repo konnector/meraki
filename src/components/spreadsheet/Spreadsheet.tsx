@@ -50,7 +50,11 @@ export default function Spreadsheet() {
   const [historyIndex, setHistoryIndex] = useState(0);
 
   const [isEditing, setIsEditing] = useState(false);
-  const [clipboard, setClipboard] = useState<{cell: CellPosition, data: CellData} | null>(null);
+  const [clipboard, setClipboard] = useState<{
+    start: CellPosition;
+    end: CellPosition;
+    cells: Record<string, CellData>;
+  } | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   // Initialize empty spreadsheet data
@@ -253,10 +257,24 @@ export default function Spreadsheet() {
 
   const handleCopy = () => {
     if (selection) {
+      const cells: Record<string, CellData> = {};
+      
+      // Copy all cells in the selection range
+      for (let row = Math.min(selection.start.row, selection.end.row); 
+           row <= Math.max(selection.start.row, selection.end.row); row++) {
+        for (let col = Math.min(selection.start.col, selection.end.col); 
+             col <= Math.max(selection.start.col, selection.end.col); col++) {
+          const key = getCellKey(row, col);
+          cells[key] = data[key] || { value: '', style: {} };
+        }
+      }
+      
       setClipboard({
-        cell: selection.start,
-        data: data[`${selection.start.row},${selection.start.col}`]
+        start: selection.start,
+        end: selection.end,
+        cells
       });
+      
       const rangeNotation = getCellRangeNotation(selection.start, selection.end);
       addNotification(`Copied (${rangeNotation})`);
     }
@@ -264,16 +282,30 @@ export default function Spreadsheet() {
 
   const handleCut = () => {
     if (selection) {
-      const startKey = `${selection.start.row},${selection.start.col}`;
-      // Save to clipboard
+      // Save to clipboard with full range
+      const cells: Record<string, CellData> = {};
+      
+      // Copy all cells in the selection range
+      for (let row = Math.min(selection.start.row, selection.end.row); 
+           row <= Math.max(selection.start.row, selection.end.row); row++) {
+        for (let col = Math.min(selection.start.col, selection.end.col); 
+             col <= Math.max(selection.start.col, selection.end.col); col++) {
+          const key = getCellKey(row, col);
+          cells[key] = data[key] || { value: '', style: {} };
+        }
+      }
+      
       setClipboard({
-        cell: selection.start,
-        data: data[startKey] || { value: '', style: {} }
+        start: selection.start,
+        end: selection.end,
+        cells
       });
       
       // Clear the selected range
-      for (let row = Math.min(selection.start.row, selection.end.row); row <= Math.max(selection.start.row, selection.end.row); row++) {
-        for (let col = Math.min(selection.start.col, selection.end.col); col <= Math.max(selection.start.col, selection.end.col); col++) {
+      for (let row = Math.min(selection.start.row, selection.end.row); 
+           row <= Math.max(selection.start.row, selection.end.row); row++) {
+        for (let col = Math.min(selection.start.col, selection.end.col); 
+             col <= Math.max(selection.start.col, selection.end.col); col++) {
           updateCellData(row, col, { value: '', style: {} });
         }
       }
@@ -283,15 +315,74 @@ export default function Spreadsheet() {
     }
   };
 
+  // FIXED PASTE FUNCTION
   const handlePaste = () => {
     if (selectedCell && clipboard) {
-      const sourceCell = getCellRangeNotation(clipboard.cell, clipboard.cell);
-      const targetCell = getCellRangeNotation(selectedCell, selectedCell);
+      // Calculate dimensions of copied range
+      const rowCount = Math.abs(clipboard.end.row - clipboard.start.row) + 1;
+      const colCount = Math.abs(clipboard.end.col - clipboard.start.col) + 1;
       
-      // Perform the paste operation
-      updateCellData(selectedCell.row, selectedCell.col, { ...clipboard.data });
+      // Calculate starting positions for source range
+      const sourceStartRow = Math.min(clipboard.start.row, clipboard.end.row);
+      const sourceStartCol = Math.min(clipboard.start.col, clipboard.end.col);
       
-      addNotification(`Pasted (${sourceCell}) to (${targetCell})`);
+      // Create a batch update
+      const newDataState = { ...data };
+      
+      // Paste all cells in the range
+      for (let rowOffset = 0; rowOffset < rowCount; rowOffset++) {
+        for (let colOffset = 0; colOffset < colCount; colOffset++) {
+          const sourceRow = sourceStartRow + rowOffset;
+          const sourceCol = sourceStartCol + colOffset;
+          const sourceKey = getCellKey(sourceRow, sourceCol);
+          
+          const targetRow = selectedCell.row + rowOffset;
+          const targetCol = selectedCell.col + colOffset;
+          const targetKey = getCellKey(targetRow, targetCol);
+          
+          // Get the source cell data from clipboard
+          const sourceCellData = clipboard.cells[sourceKey];
+          if (sourceCellData) {
+            // Add to our batch update
+            const currentData = newDataState[targetKey] || { value: '' };
+            newDataState[targetKey] = {
+              ...currentData,
+              value: sourceCellData.value,
+              formula: sourceCellData.formula,
+              style: sourceCellData.style
+            };
+          }
+        }
+      }
+      
+      // Update data once with all changes
+      setData(newDataState);
+      
+      // Add to history
+      const newHistory = history.slice(0, historyIndex + 1);
+      newHistory.push(newDataState);
+      setHistory(newHistory);
+      setHistoryIndex(newHistory.length - 1);
+      
+      // Update selection to cover the pasted range
+      const pasteEnd = {
+        row: selectedCell.row + rowCount - 1,
+        col: selectedCell.col + colCount - 1
+      };
+      
+      setSelection({
+        start: selectedCell,
+        end: pasteEnd
+      });
+      
+      const sourceRange = getCellRangeNotation(clipboard.start, clipboard.end);
+      const targetRange = getCellRangeNotation(selectedCell, pasteEnd);
+      addNotification(`Pasted (${sourceRange}) to (${targetRange})`);
+      
+      // Recalculate formulas after paste
+      setTimeout(() => {
+        recalculateDependentCells(-1, -1);
+      }, 0);
     }
   };
 
