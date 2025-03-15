@@ -2,6 +2,19 @@ import { FormulaType } from './types';
 
 type CellAccessFunction = (row: number, col: number) => string;
 
+// Error types for better error handling
+export const ERRORS = {
+  DIV_BY_ZERO: '#DIV/0!',
+  VALUE: '#VALUE!',
+  REF: '#REF!',
+  NAME: '#NAME?',
+  NUM: '#NUM!',
+  NULL: '#NULL!',
+  INVALID_FORMULA: '#ERROR!'
+} as const;
+
+type SpreadsheetError = typeof ERRORS[keyof typeof ERRORS];
+
 /**
  * Parse a cell reference (e.g., A1, B2) to row and column indices
  */
@@ -22,40 +35,59 @@ export const parseCellReference = (ref: string): { row: number; col: number } | 
 };
 
 /**
- * Parse a cell range (e.g., A1:B3) to start and end cell positions
+ * Parse multiple ranges or single cells (e.g., "A1:B3,C1,D1:D5")
  */
-export const parseCellRange = (range: string): { startRow: number; startCol: number; endRow: number; endCol: number } | null => {
-  const [start, end] = range.split(':');
-  if (!start || !end) return null;
+export const parseRanges = (rangeStr: string): { startRow: number; startCol: number; endRow: number; endCol: number }[] => {
+  const ranges = rangeStr.split(',').map(range => range.trim());
+  const result = [];
+
+  for (const range of ranges) {
+    if (range.includes(':')) {
+      // Handle range (e.g., A1:B3)
+      const [start, end] = range.split(':');
+      const startRef = parseCellReference(start);
+      const endRef = parseCellReference(end);
+      
+      if (!startRef || !endRef) continue;
+      
+      result.push({
+        startRow: Math.min(startRef.row, endRef.row),
+        startCol: Math.min(startRef.col, endRef.col),
+        endRow: Math.max(startRef.row, endRef.row),
+        endCol: Math.max(startRef.col, endRef.col)
+      });
+    } else {
+      // Handle single cell (e.g., A1)
+      const cellRef = parseCellReference(range);
+      if (!cellRef) continue;
+      
+      result.push({
+        startRow: cellRef.row,
+        startCol: cellRef.col,
+        endRow: cellRef.row,
+        endCol: cellRef.col
+      });
+    }
+  }
   
-  const startRef = parseCellReference(start);
-  const endRef = parseCellReference(end);
-  
-  if (!startRef || !endRef) return null;
-  
-  return {
-    startRow: startRef.row,
-    startCol: startRef.col,
-    endRow: endRef.row,
-    endCol: endRef.col
-  };
+  return result;
 };
 
 /**
- * Get values from a cell range
+ * Get numeric values from multiple ranges
  */
-const getCellRangeValues = (range: string, getCellValue: CellAccessFunction): number[] => {
-  const rangeInfo = parseCellRange(range);
-  if (!rangeInfo) return [];
-  
-  const { startRow, startCol, endRow, endCol } = rangeInfo;
+const getNumericValues = (rangeStr: string, getCellValue: CellAccessFunction): number[] => {
+  const ranges = parseRanges(rangeStr);
   const values: number[] = [];
   
-  for (let row = startRow; row <= endRow; row++) {
-    for (let col = startCol; col <= endCol; col++) {
-      const value = parseFloat(getCellValue(row, col));
-      if (!isNaN(value)) {
-        values.push(value);
+  for (const range of ranges) {
+    for (let row = range.startRow; row <= range.endRow; row++) {
+      for (let col = range.startCol; col <= range.endCol; col++) {
+        const value = getCellValue(row, col);
+        const numValue = parseFloat(value);
+        if (!isNaN(numValue)) {
+          values.push(numValue);
+        }
       }
     }
   }
@@ -64,55 +96,77 @@ const getCellRangeValues = (range: string, getCellValue: CellAccessFunction): nu
 };
 
 /**
- * Calculate the sum of values in a range
+ * Calculate the sum of values in multiple ranges
  */
-const sum = (range: string, getCellValue: CellAccessFunction): number => {
-  const values = getCellRangeValues(range, getCellValue);
+const sum = (rangeStr: string, getCellValue: CellAccessFunction): number | SpreadsheetError => {
+  const values = getNumericValues(rangeStr, getCellValue);
+  if (values.length === 0) return 0;
   return values.reduce((acc, val) => acc + val, 0);
 };
 
 /**
- * Calculate the average of values in a range
+ * Calculate the average of values in multiple ranges
  */
-const average = (range: string, getCellValue: CellAccessFunction): number => {
-  const values = getCellRangeValues(range, getCellValue);
-  if (values.length === 0) return 0;
+const average = (rangeStr: string, getCellValue: CellAccessFunction): number | SpreadsheetError => {
+  const values = getNumericValues(rangeStr, getCellValue);
+  if (values.length === 0) return ERRORS.DIV_BY_ZERO;
   return values.reduce((acc, val) => acc + val, 0) / values.length;
 };
 
 /**
- * Find the maximum value in a range
+ * Find the maximum value in multiple ranges
  */
-const max = (range: string, getCellValue: CellAccessFunction): number => {
-  const values = getCellRangeValues(range, getCellValue);
-  if (values.length === 0) return 0;
+const max = (rangeStr: string, getCellValue: CellAccessFunction): number | SpreadsheetError => {
+  const values = getNumericValues(rangeStr, getCellValue);
+  if (values.length === 0) return ERRORS.NULL;
   return Math.max(...values);
 };
 
 /**
- * Find the minimum value in a range
+ * Find the minimum value in multiple ranges
  */
-const min = (range: string, getCellValue: CellAccessFunction): number => {
-  const values = getCellRangeValues(range, getCellValue);
-  if (values.length === 0) return 0;
+const min = (rangeStr: string, getCellValue: CellAccessFunction): number | SpreadsheetError => {
+  const values = getNumericValues(rangeStr, getCellValue);
+  if (values.length === 0) return ERRORS.NULL;
   return Math.min(...values);
 };
 
 /**
- * Count non-empty cells in a range
+ * Count non-empty cells in multiple ranges
  */
-const count = (range: string, getCellValue: CellAccessFunction): number => {
-  const rangeInfo = parseCellRange(range);
-  if (!rangeInfo) return 0;
-  
-  const { startRow, startCol, endRow, endCol } = rangeInfo;
+const count = (rangeStr: string, getCellValue: CellAccessFunction): number => {
+  const ranges = parseRanges(rangeStr);
   let count = 0;
   
-  for (let row = startRow; row <= endRow; row++) {
-    for (let col = startCol; col <= endCol; col++) {
-      const value = getCellValue(row, col);
-      if (value && value.trim() !== '') {
-        count++;
+  for (const range of ranges) {
+    for (let row = range.startRow; row <= range.endRow; row++) {
+      for (let col = range.startCol; col <= range.endCol; col++) {
+        const value = getCellValue(row, col);
+        if (value && value.trim() !== '') {
+          count++;
+        }
+      }
+    }
+  }
+  
+  return count;
+};
+
+/**
+ * Count numeric values in multiple ranges
+ */
+const countNumbers = (rangeStr: string, getCellValue: CellAccessFunction): number => {
+  const ranges = parseRanges(rangeStr);
+  let count = 0;
+  
+  for (const range of ranges) {
+    for (let row = range.startRow; row <= range.endRow; row++) {
+      for (let col = range.startCol; col <= range.endCol; col++) {
+        const value = getCellValue(row, col);
+        const numValue = parseFloat(value);
+        if (!isNaN(numValue)) {
+          count++;
+        }
       }
     }
   }
@@ -190,44 +244,45 @@ const evaluateArithmeticExpression = (expression: string): number => {
 /**
  * Evaluate a formula
  */
-export const evaluateFormula = (formula: string, getCellValue: CellAccessFunction): number | string | undefined => {
+export const evaluateFormula = (formula: string, getCellValue: CellAccessFunction): string | number | SpreadsheetError => {
   // Check if it's a formula starting with =
   if (!formula.startsWith('=')) {
     return formula;
   }
   
   try {
-    // Remove the = prefix
+    // Remove the = prefix and trim whitespace
     const expression = formula.slice(1).trim().toUpperCase();
     
-    // Check for built-in functions: SUM, AVERAGE, MAX, MIN, COUNT
-    const sumMatch = expression.match(/^SUM\(([A-Z0-9:]+)\)$/);
-    if (sumMatch) {
-      return sum(sumMatch[1], getCellValue);
+    // Function pattern with support for multiple ranges
+    const functionPattern = /^([A-Z]+)\((.*)\)$/;
+    const match = expression.match(functionPattern);
+    
+    if (match) {
+      const [, functionName, args] = match;
+      
+      switch (functionName) {
+        case 'SUM':
+          return sum(args, getCellValue);
+        case 'AVERAGE':
+          return average(args, getCellValue);
+        case 'MAX':
+          return max(args, getCellValue);
+        case 'MIN':
+          return min(args, getCellValue);
+        case 'COUNT':
+          return count(args, getCellValue);
+        case 'COUNTA':
+          return count(args, getCellValue);
+        case 'COUNTNUMBERS':
+          return countNumbers(args, getCellValue);
+        default:
+          return ERRORS.NAME;
+      }
     }
     
-    const averageMatch = expression.match(/^AVERAGE\(([A-Z0-9:]+)\)$/);
-    if (averageMatch) {
-      return average(averageMatch[1], getCellValue);
-    }
-    
-    const maxMatch = expression.match(/^MAX\(([A-Z0-9:]+)\)$/);
-    if (maxMatch) {
-      return max(maxMatch[1], getCellValue);
-    }
-    
-    const minMatch = expression.match(/^MIN\(([A-Z0-9:]+)\)$/);
-    if (minMatch) {
-      return min(minMatch[1], getCellValue);
-    }
-    
-    const countMatch = expression.match(/^COUNT\(([A-Z0-9:]+)\)$/);
-    if (countMatch) {
-      return count(countMatch[1], getCellValue);
-    }
-    
-    // Handle cell references like A1, B2, etc.
-    // Replace cell references with their values
+    // If no function match, try to evaluate as a cell reference or basic arithmetic
+    // This part will be enhanced in the next implementation
     const cellReferenceRegex = /([A-Za-z]+\d+)/g;
     const expressionWithValues = expression.replace(cellReferenceRegex, (match) => {
       const ref = parseCellReference(match);
@@ -240,9 +295,10 @@ export const evaluateFormula = (formula: string, getCellValue: CellAccessFunctio
     });
     
     // Evaluate the arithmetic expression
-    return evaluateArithmeticExpression(expressionWithValues);
+    const result = evaluateArithmeticExpression(expressionWithValues);
+    return isNaN(result) ? ERRORS.VALUE : result;
   } catch (error) {
     console.error('Error evaluating formula', formula, error);
-    return 'ERROR';
+    return ERRORS.INVALID_FORMULA;
   }
 };
