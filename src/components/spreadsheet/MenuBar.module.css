@@ -1,0 +1,78 @@
+.menuContainer {
+  @apply w-full border-b border-gray-200;
+}
+
+.menuBar {
+  @apply flex items-center justify-between px-4 py-1 bg-white;
+}
+
+.menuItems {
+  @apply flex items-center space-x-1;
+}
+
+.menuButton {
+  @apply px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md;
+}
+
+.activeMenuButton {
+  @apply bg-gray-100;
+}
+
+.dropdownContent {
+  @apply py-1 bg-white rounded-xl shadow-lg border border-gray-200 min-w-[160px];
+  margin-top: 4px !important;
+}
+
+.menuItem {
+  @apply flex items-center px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer;
+}
+
+.menuItem:first-child {
+  @apply rounded-t-lg;
+}
+
+.menuItem:last-child {
+  @apply rounded-b-lg;
+}
+
+.profileButton {
+  @apply flex items-center;
+}
+
+.profileDropdown {
+  @apply py-1 bg-white rounded-xl shadow-lg border border-gray-200 min-w-[160px];
+}
+
+/* Hover Menu Styles */
+.menuGroup {
+  @apply relative;
+}
+
+.menuGroup:hover .dropdownContent {
+  @apply block;
+}
+
+.dropdownContent {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 50;
+}
+
+/* Profile dropdown specific positioning */
+.profileGroup .dropdownContent {
+  right: -8px !important;
+  left: auto !important;
+}
+
+/* Ensure profile dropdown shows correctly */
+.profileButton:focus-visible,
+.profileButton:focus, 
+.profileButton:active,
+.profileButton:hover {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+} 
