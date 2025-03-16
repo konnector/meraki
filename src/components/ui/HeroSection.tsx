@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { AnimatedShinyText } from '@/components/magicui/animated-shiny-text'
+import { AISpreadsheetDemo } from './AISpreadsheetDemo'
 
 export function HeroSection() {
   return (
@@ -79,12 +80,11 @@ export function HeroSection() {
           </div>
         </div>
 
-        {/* Right Column - Calendar Preview */}
+        {/* Right Column - AI Spreadsheet Demo */}
         <div className="relative z-[2] mx-auto origin-top-left self-center justify-self-center">
           <div className="animate-move-up lg:animate-fade-right origin-center transform rounded-xl bg-[#FAFAFA] p-1 transition-all duration-500 border border-gray-200">
-            {/* Calendar content will go here in the next step */}
-            <div className="h-[580px] w-[500px] md:h-[410px] rounded-xl border border-gray-200 bg-white">
-              {/* We'll add the calendar component here later */}
+            <div className="h-[580px] w-[500px] md:h-[410px] rounded-xl border border-gray-200 overflow-hidden">
+              <AISpreadsheetDemo />
             </div>
           </div>
         </div>

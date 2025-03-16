@@ -1,16 +1,26 @@
 @import './fonts.css';
+@import './tailwind.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
   --foreground-rgb: 0, 0, 0;
-  --background-rgb: 255, 255, 255;
+  --background-start-rgb: 255, 255, 255;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-rgb));
+  background: rgb(var(--background-start-rgb));
 }
 
 @layer components {
@@ -230,6 +240,19 @@ img,
     animation: fadeRight 0.5s ease-out forwards;
   }
 
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Animation durations */
+  .animate-scroll-up {
+    animation: scroll-up var(--duration, 25s) linear infinite;
+  }
+
+  .animate-scroll-down {
+    animation: scroll-down var(--duration, 25s) linear infinite;
+  }
+
   @keyframes scroll-up {
     from {
       transform: translateY(0);
@@ -246,14 +269,6 @@ img,
     to {
       transform: translateY(0);
     }
-  }
-
-  .animate-scroll-up {
-    animation: scroll-up var(--duration, 30s) linear infinite;
-  }
-
-  .animate-scroll-down {
-    animation: scroll-down var(--duration, 30s) linear infinite;
   }
 }
 
