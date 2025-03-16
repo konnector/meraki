@@ -3,7 +3,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { AnimatedShinyText } from '@/components/magicui/animated-shiny-text'
-import { AISpreadsheetDemo } from './AISpreadsheetDemo'
 
 export function HeroSection() {
   return (
@@ -26,7 +25,7 @@ export function HeroSection() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid w-full grid-cols-1 items-center justify-start gap-4 py-0 md:gap-[6%] lg:grid-cols-[45%_auto] lg:items-start">
+      <div className="grid w-full grid-cols-1 items-center justify-start gap-4 py-0 md:gap-[2%] lg:grid-cols-[45%_auto] lg:items-start">
         {/* Left Column - Content */}
         <div className="animate-move-up z-[3] w-full flex-col items-center p-4 text-center lg:items-start lg:text-left">
           {/* Announcement Banner */}
@@ -80,11 +79,12 @@ export function HeroSection() {
           </div>
         </div>
 
-        {/* Right Column - AI Spreadsheet Demo */}
-        <div className="relative z-[2] mx-auto origin-top-left self-center justify-self-center">
+        {/* Right Column - Calendar Preview */}
+        <div className="relative z-[2] origin-top-left self-center mt-8">
           <div className="animate-move-up lg:animate-fade-right origin-center transform rounded-xl bg-[#FAFAFA] p-1 transition-all duration-500 border border-gray-200">
-            <div className="h-[580px] w-[500px] md:h-[410px] rounded-xl border border-gray-200 overflow-hidden">
-              <AISpreadsheetDemo />
+            {/* Calendar content will go here in the next step */}
+            <div className="h-[580px] w-[520px] md:h-[410px] rounded-xl border border-gray-200 bg-white">
+              {/* We'll add the calendar component here later */}
             </div>
           </div>
         </div>
