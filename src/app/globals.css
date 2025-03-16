@@ -1,3 +1,4 @@
+@import './fonts.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -64,6 +65,12 @@ body {
   .resize-handle-row {
     @apply absolute bottom-0 left-0 h-1 w-full cursor-row-resize bg-transparent hover:bg-black z-20;
   }
+
+  .shadow-fade {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05),
+                0 4px 8px rgba(0, 0, 0, 0.05),
+                0 8px 16px rgba(0, 0, 0, 0.05);
+  }
 }
 
 /* Override shadcn dropdown styles for better appearance */
@@ -113,7 +120,7 @@ img,
     --color-4: 195 100% 63%;
     --color-5: 90 100% 63%;
     
-    --background: 0 0% 100%;
+    --background: 0 0% 96%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -165,6 +172,12 @@ img,
 
   body {
     @apply antialiased;
+    background-color: rgba(244,244,244,255);
+  }
+
+  /* Override section backgrounds */
+  section {
+    background-color: rgba(244,244,244,255) !important;
   }
 }
 
@@ -181,4 +194,43 @@ img,
   .container {
     @apply max-w-7xl mx-auto;
   }
+
+  .shadow-fade {
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.08),
+                0px 4px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  @keyframes moveUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeRight {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .animate-move-up {
+    animation: moveUp 0.5s ease-out forwards;
+  }
+
+  .animate-fade-right {
+    animation: fadeRight 0.5s ease-out forwards;
+  }
+}
+
+.header_blend-layer {
+  mix-blend-mode: difference;
 }

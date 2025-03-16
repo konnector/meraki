@@ -10,12 +10,21 @@ module.exports = {
   theme: {
   	container: {
   		center: true,
-  		padding: "2rem",
+  		padding: '2rem',
   		screens: {
-  			"2xl": "1400px",
-  		},
+  			'2xl': '1400px'
+  		}
   	},
   	extend: {
+  		fontFamily: {
+  			cal: [
+  				'Cal Sans',
+  				'sans-serif'
+  			],
+  			matter: [
+  				'var(--font-matter)'
+  			]
+  		},
   		colors: {
   			'color-1': 'hsl(var(--color-1))',
   			'color-2': 'hsl(var(--color-2))',
@@ -28,9 +37,9 @@ module.exports = {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			primary: {
+  				'50': '#f0f6ff',
   				DEFAULT: 'hsl(var(--primary))',
-  				foreground: 'hsl(var(--primary-foreground))',
-  				50: '#f0f6ff',
+  				foreground: 'hsl(var(--primary-foreground))'
   			},
   			secondary: {
   				DEFAULT: 'hsl(var(--secondary))',
@@ -59,8 +68,9 @@ module.exports = {
   		},
   		animation: {
   			rainbow: 'rainbow var(--speed, 2s) infinite linear',
-  			"accordion-down": "accordion-down 0.2s ease-out",
-  			"accordion-up": "accordion-up 0.2s ease-out",
+  			'accordion-down': 'accordion-down 0.2s ease-out',
+  			'accordion-up': 'accordion-up 0.2s ease-out',
+  			'shiny-text': 'shiny-text 8s infinite'
   		},
   		keyframes: {
   			rainbow: {
@@ -71,14 +81,30 @@ module.exports = {
   					'background-position': '200%'
   				}
   			},
-  			"accordion-down": {
-  				from: { height: 0 },
-  				to: { height: "var(--radix-accordion-content-height)" },
+  			'accordion-down': {
+  				from: {
+  					height: 0
+  				},
+  				to: {
+  					height: 'var(--radix-accordion-content-height)'
+  				}
   			},
-  			"accordion-up": {
-  				from: { height: "var(--radix-accordion-content-height)" },
-  				to: { height: 0 },
+  			'accordion-up': {
+  				from: {
+  					height: 'var(--radix-accordion-content-height)'
+  				},
+  				to: {
+  					height: 0
+  				}
   			},
+  			'shiny-text': {
+  				'0%, 90%, 100%': {
+  					'background-position': 'calc(-100% - var(--shiny-width)) 0'
+  				},
+  				'30%, 60%': {
+  					'background-position': 'calc(100% + var(--shiny-width)) 0'
+  				}
+  			}
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
