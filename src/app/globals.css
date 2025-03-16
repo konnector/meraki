@@ -229,6 +229,32 @@ img,
   .animate-fade-right {
     animation: fadeRight 0.5s ease-out forwards;
   }
+
+  @keyframes scroll-up {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-50%);
+    }
+  }
+
+  @keyframes scroll-down {
+    from {
+      transform: translateY(-50%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  .animate-scroll-up {
+    animation: scroll-up var(--duration, 30s) linear infinite;
+  }
+
+  .animate-scroll-down {
+    animation: scroll-down var(--duration, 30s) linear infinite;
+  }
 }
 
 .header_blend-layer {

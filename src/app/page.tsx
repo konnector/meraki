@@ -4,6 +4,9 @@ import { NavigationBar } from "@/components/ui/NavigationBar"
 import { HeroSection } from "@/components/ui/HeroSection"
 import { Footer } from "@/components/ui/Footer"
 import HowItWorks from '@/components/ui/HowItWorks'
+import { TestimonialsSection } from '@/components/ui/TestimonialsSection'
+import { PricingSection } from '@/components/ui/PricingSection'
+import { FeaturesSection } from '@/components/ui/FeaturesSection'
 
 export const metadata: Metadata = {
   title: 'Meraki Sheets - Modern Online Spreadsheet',
@@ -26,24 +29,18 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-24 border-t border-gray-400/40">
-        <div className="container">
-          {/* Features content will go here */}
-        </div>
+      <section className="py-1 border-t border-gray-400/40">
+        <FeaturesSection />
       </section>
 
       {/* Testimonials Section */}
       <section className="py-24 border-t border-gray-400/40">
-        <div className="container">
-          {/* Testimonials content will go here */}
-        </div>
+        <TestimonialsSection />
       </section>
 
       {/* Pricing Section */}
       <section className="py-24 border-t border-gray-400/40">
-        <div className="container">
-          {/* Pricing content will go here */}
-        </div>
+        <PricingSection />
       </section>
 
       {/* CTA Section */}
