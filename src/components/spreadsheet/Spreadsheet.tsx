@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { CellData, CellPosition, Selection, ColumnSize, RowSize } from './types';
 import Toolbar from './Toolbar';
 import Grid from './Grid';
@@ -12,6 +13,10 @@ import { ClipboardIcon, DocumentDuplicateIcon as ClipboardCopyIcon, ArrowUturnLe
 
 const DEFAULT_ROWS = 100;
 const DEFAULT_COLS = 26;
+
+interface SpreadsheetProps {
+  sheetId: string;
+}
 
 type Notification = {
   id: string;
@@ -36,14 +41,16 @@ const formatTimeAgo = (timestamp: number) => {
   }
 };
 
-export default function Spreadsheet() {
+export default function Spreadsheet({ sheetId }: SpreadsheetProps) {
+  const supabase = createClientComponentClient();
   const [data, setData] = useState<Record<string, CellData>>({});
   const [selectedCell, setSelectedCell] = useState<CellPosition | null>(null);
   const [editingCell, setEditingCell] = useState<CellPosition | null>(null);
   const [selection, setSelection] = useState<Selection | null>(null);
   const [columnSizes, setColumnSizes] = useState<ColumnSize[]>([]);
   const [rowSizes, setRowSizes] = useState<RowSize[]>([]);
-  const [title, setTitle] = useState('Untitled spreadsheet');
+  const [title, setTitle] = useState('Loading...');
+  const [isLoading, setIsLoading] = useState(true);
   
   // Add history tracking
   const [history, setHistory] = useState<Record<string, CellData>[]>([{}]);
@@ -57,22 +64,78 @@ export default function Spreadsheet() {
   } | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  // Initialize empty spreadsheet data
+  // Load sheet data
   useEffect(() => {
-    const initialData: Record<string, CellData> = {};
-    setData(initialData);
-    setHistory([initialData]);
-  }, []);
+    const loadSheetData = async () => {
+      try {
+        // Load sheet metadata
+        const { data: sheet, error: sheetError } = await supabase
+          .from('sheets')
+          .select('*')
+          .eq('id', sheetId)
+          .single();
 
-  const getCellKey = (row: number, col: number) => `${row},${col}`;
+        if (sheetError) throw sheetError;
+        if (sheet) {
+          setTitle(sheet.title);
+        }
 
-  const getCellData = (row: number, col: number): CellData => {
-    const key = getCellKey(row, col);
-    return data[key] || { value: '' };
-  };
+        // Load sheet data
+        const { data: cellData, error: dataError } = await supabase
+          .from('sheet_data')
+          .select('*')
+          .eq('sheet_id', sheetId);
 
-  // Update the updateCellData function to track history
-  const updateCellData = (row: number, col: number, cellData: Partial<CellData>) => {
+        if (dataError) throw dataError;
+
+        // Convert array of cell data to our data format
+        const newData: Record<string, CellData> = {};
+        cellData?.forEach(cell => {
+          const key = getCellKey(cell.row_index, cell.col_index);
+          newData[key] = {
+            value: cell.cell_value || '',
+            type: cell.cell_type || 'text'
+          };
+        });
+
+        setData(newData);
+        setHistory([newData]);
+        setHistoryIndex(0);
+      } catch (error) {
+        console.error('Error loading sheet:', error);
+        addNotification('Error loading sheet');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadSheetData();
+  }, [sheetId, supabase]);
+
+  // Save changes to database
+  const saveChanges = useCallback(async (key: string, cellData: CellData) => {
+    const [row, col] = key.split(',').map(Number);
+    
+    try {
+      const { error } = await supabase
+        .from('sheet_data')
+        .upsert({
+          sheet_id: sheetId,
+          row_index: row,
+          col_index: col,
+          cell_value: cellData.value,
+          cell_type: cellData.type || 'text'
+        });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error saving cell:', error);
+      addNotification('Error saving changes');
+    }
+  }, [sheetId, supabase]);
+
+  // Update the updateCellData function to save to database
+  const updateCellData = useCallback((row: number, col: number, cellData: Partial<CellData>) => {
     const key = getCellKey(row, col);
     const currentData = data[key] || { value: '' };
     const newData = { ...currentData, ...cellData };
@@ -86,16 +149,26 @@ export default function Spreadsheet() {
     // Update data
     setData(newDataState);
 
-    // Add to history (remove any future states if we're not at the latest point)
+    // Add to history
     const newHistory = history.slice(0, historyIndex + 1);
     newHistory.push(newDataState);
     setHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
 
+    // Save to database
+    saveChanges(key, newData);
+
     // Re-evaluate cells with formulas if needed
     if (cellData.value !== undefined) {
       recalculateDependentCells(row, col);
     }
+  }, [data, history, historyIndex, saveChanges]);
+
+  const getCellKey = (row: number, col: number) => `${row},${col}`;
+
+  const getCellData = (row: number, col: number): CellData => {
+    const key = getCellKey(row, col);
+    return data[key] || { value: '' };
   };
 
   const addNotification = useCallback((message: string) => {
@@ -459,9 +532,40 @@ export default function Spreadsheet() {
     return null;
   };
 
+  const handleTitleChange = async (newTitle: string) => {
+    try {
+      const { error } = await supabase
+        .from('sheets')
+        .update({ title: newTitle })
+        .eq('id', sheetId);
+
+      if (error) throw error;
+      setTitle(newTitle);
+      addNotification('Sheet name updated');
+    } catch (error) {
+      console.error('Error updating sheet title:', error);
+      addNotification('Error updating sheet name');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-gray-600">Loading spreadsheet...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen">
-      <MenuBar title={title} />
+      <MenuBar 
+        title={title} 
+        sheetId={sheetId}
+        onTitleChange={handleTitleChange}
+      />
       <Toolbar 
         selectedCell={selectedCell}
         selection={selection}

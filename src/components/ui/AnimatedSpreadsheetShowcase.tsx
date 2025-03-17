@@ -347,7 +347,7 @@ export function AnimatedSpreadsheetShowcase() {
               transition={{ delay: 0.2 }}
             >
               <div className="flex items-center">
-                <div className="w-6 h-6 rounded-md bg-blue-500 mr-2"></div>
+                <div className="w-6 h-6 rounded-md bg-black-500 mr-2"></div>
                 <div className="text-sm font-medium text-gray-600">Cold Outbound Email Tracker</div>
               </div>
               

@@ -2,6 +2,7 @@ export interface CellData {
   value: string;
   formula?: string;
   style?: CellStyle;
+  type?: 'text' | 'number' | 'date' | 'formula';
 }
 
 export interface CellStyle {

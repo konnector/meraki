@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { RainbowButton } from "@/components/magicui/rainbow-button";
+import Link from 'next/link';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,19 +15,26 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { 
-  Star, StarOff, User, Settings, CreditCard, LogOut, 
+  Star, User, Settings, CreditCard, LogOut, 
   FileText, Copy, Scissors, ClipboardPaste, Search, ChevronDown,
-  Plus, BarChart3, FunctionSquare, Image
+  Plus, BarChart3, FunctionSquare, Image, Grid2X2
 } from 'lucide-react';
 import styles from './MenuBar.module.css';
 
 interface MenuBarProps {
   title: string;
+  sheetId: string;
+  onTitleChange?: (newTitle: string) => void;
 }
 
-export default function MenuBar({ title }: MenuBarProps) {
+export default function MenuBar({ title, sheetId, onTitleChange }: MenuBarProps) {
   const [isStarred, setIsStarred] = useState(false);
+  const [isStarring, setIsStarring] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(title);
+  const [userEmail, setUserEmail] = useState<string>("");
+  const supabase = createClientComponentClient();
   
   // Example of how to add icons to menu items
   const fileMenuItems = [
@@ -51,17 +60,115 @@ export default function MenuBar({ title }: MenuBarProps) {
     Help: ['Documentation', 'Keyboard shortcuts', 'Report abuse', 'About']
   };
 
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email) {
+        setUserEmail(user.email);
+      }
+    };
+    getUser();
+  }, [supabase.auth]);
+
+  // Fetch initial starred status
+  useEffect(() => {
+    const fetchStarredStatus = async () => {
+      const { data, error } = await supabase
+        .from('sheets')
+        .select('is_starred')
+        .eq('id', sheetId)
+        .single();
+      
+      if (!error && data) {
+        setIsStarred(data.is_starred);
+      }
+    };
+    
+    fetchStarredStatus();
+  }, [sheetId, supabase]);
+
+  // Handle starring/unstarring
+  const handleStarClick = async () => {
+    if (isStarring) return; // Prevent multiple clicks while processing
+    
+    setIsStarring(true);
+    const newStarredStatus = !isStarred;
+    
+    // Optimistic update
+    setIsStarred(newStarredStatus);
+    
+    try {
+      const { error } = await supabase
+        .from('sheets')
+        .update({ is_starred: newStarredStatus })
+        .eq('id', sheetId);
+      
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      // Revert on error
+      setIsStarred(!newStarredStatus);
+      console.error('Error updating starred status:', error);
+    } finally {
+      setIsStarring(false);
+    }
+  };
+
+  const handleTitleClick = () => {
+    setIsEditing(true);
+    setEditedTitle(title);
+  };
+
+  const handleTitleBlur = () => {
+    setIsEditing(false);
+    if (editedTitle.trim() !== title && onTitleChange) {
+      onTitleChange(editedTitle.trim());
+    }
+  };
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      e.currentTarget.blur();
+    } else if (e.key === 'Escape') {
+      setIsEditing(false);
+      setEditedTitle(title);
+    }
+  };
+
   return (
     <div className={styles.menuContainer}>
       <div className={styles.menuBar}>
-        {/* Left side - Title and Star */}
+        {/* Left side - Dashboard Icon, Title and Star */}
         <div className="flex items-center gap-2">
-          <h1 className="text-lg font-medium">{title}</h1>
+          <Link href="/dashboard" className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+            <Grid2X2 className="w-5 h-5 text-emerald-600" />
+          </Link>
+          {isEditing ? (
+            <input
+              type="text"
+              value={editedTitle}
+              onChange={(e) => setEditedTitle(e.target.value)}
+              onBlur={handleTitleBlur}
+              onKeyDown={handleTitleKeyDown}
+              className="text-lg font-medium bg-transparent border-b border-gray-300 focus:border-blue-500 focus:outline-none px-0 py-0.5 min-w-[200px]"
+              autoFocus
+            />
+          ) : (
+            <h1 
+              className="text-lg font-medium cursor-pointer hover:text-blue-600"
+              onClick={handleTitleClick}
+            >
+              {title}
+            </h1>
+          )}
           <button 
-            onClick={() => setIsStarred(!isStarred)}
-            className="text-gray-500 hover:text-yellow-500"
+            onClick={handleStarClick}
+            disabled={isStarring}
+            className={`text-gray-500 hover:text-yellow-500 transition-colors ${isStarring ? 'opacity-50' : ''}`}
           >
-            {isStarred ? <Star className="w-5 h-5 fill-yellow-400" /> : <StarOff className="w-5 h-5" />}
+            <Star className={`w-5 h-5 ${isStarred ? 'fill-yellow-400 text-yellow-400' : ''}`} />
           </button>
         </div>
 
@@ -125,14 +232,16 @@ export default function MenuBar({ title }: MenuBarProps) {
           <div className={styles.profileButton}>
             <div className="flex items-center gap-1 focus:outline-none focus:ring-0">
               <Avatar className="h-8 w-8 cursor-pointer border-0 ring-0 outline-none">
-                <AvatarImage src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1000&auto=format&fit=crop" />
-                <AvatarFallback>User</AvatarFallback>
+                <AvatarImage src={`https://avatar.vercel.sh/${userEmail}`} />
+                <AvatarFallback>{userEmail?.charAt(0).toUpperCase()}</AvatarFallback>
               </Avatar>
               <ChevronDown className="h-4 w-4 text-gray-500 ml-1" />
             </div>
           </div>
           <div className={`${styles.dropdownContent}`}>
-            <div className="px-2.5 py-1.5 text-sm font-medium">My Account</div>
+            <div className="px-2.5 py-1.5 text-sm font-medium text-muted-foreground">
+              {userEmail}
+            </div>
             <div className="my-0.5 border-t border-gray-200" />
             <div className={styles.menuItem}>
               <User className="mr-1.5 h-4 w-4" />

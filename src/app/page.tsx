@@ -7,6 +7,7 @@ import HowItWorks from '@/components/ui/HowItWorks'
 import { TestimonialsSection } from '@/components/ui/TestimonialsSection'
 import { PricingSection } from '@/components/ui/PricingSection'
 import { FeaturesSection } from '@/components/ui/FeaturesSection'
+import { CTASection } from '@/components/ui/CTASection'
 
 export const metadata: Metadata = {
   title: 'Meraki Sheets - Modern Online Spreadsheet',
@@ -44,10 +45,8 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 border-t border-gray-400/40">
-        <div className="container">
-          {/* CTA content will go here */}
-        </div>
+      <section className="py-1  border-gray-400/40">
+        <CTASection />
       </section>
 
       {/* Footer */}

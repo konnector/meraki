@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { 
   ChevronDown, 
   Users, 
@@ -32,6 +33,8 @@ export function NavigationBar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const supabase = createClientComponentClient()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -41,6 +44,21 @@ export function NavigationBar() {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      setIsAuthenticated(!!session)
+    }
+    
+    checkAuth()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [supabase.auth])
 
   const dropdownContent = {
     features: {
@@ -266,20 +284,33 @@ export function NavigationBar() {
 
           {/* Right Side - Auth Buttons */}
           <div className="flex items-center justify-center">
-            <Link 
-              href="/signin" 
-              className="mr-4 hidden text-sm font-medium lg:flex opacity-100"
-            >
-              Sign in
-            </Link>
-            <div>
-              <Link 
-                href="/sheets" 
-                className="px-3 py-2 text-sm font-medium border border-[transparent] dark:text-black bg-neutral-900 dark:bg-white hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-neutral-900 hover:opacity-90 transition-all duration-150 ease-in-out group relative hidden overflow-hidden whitespace-nowrap rounded-xl lg:flex items-center justify-center bg-gradient-to-b from-[#2c2c30] to-[#1d1d20] text-white before:shadow-[0px_2px_0.4px_0px_rgba(255,_255,_255,_0.16)_inset] before:pointer-events-none before:absolute before:inset-0 before:rounded-xl"
-              >
-                <span>Get started</span>
-              </Link>
-            </div>
+            {!isAuthenticated ? (
+              <>
+                <Link 
+                  href="/auth/signin" 
+                  className="mr-4 hidden text-sm font-medium lg:flex opacity-100"
+                >
+                  Sign in
+                </Link>
+                <div>
+                  <Link 
+                    href="/auth/signup" 
+                    className="px-3 py-2 text-sm font-medium border border-[transparent] dark:text-black bg-neutral-900 dark:bg-white hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-neutral-900 hover:opacity-90 transition-all duration-150 ease-in-out group relative hidden overflow-hidden whitespace-nowrap rounded-xl lg:flex items-center justify-center bg-gradient-to-b from-[#2c2c30] to-[#1d1d20] text-white before:shadow-[0px_2px_0.4px_0px_rgba(255,_255,_255,_0.16)_inset] before:pointer-events-none before:absolute before:inset-0 before:rounded-xl"
+                  >
+                    <span>Get started</span>
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <div>
+                <Link 
+                  href="/sheets" 
+                  className="px-3 py-2 text-sm font-medium border border-[transparent] dark:text-black bg-neutral-900 dark:bg-white hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-neutral-900 hover:opacity-90 transition-all duration-150 ease-in-out group relative hidden overflow-hidden whitespace-nowrap rounded-xl lg:flex items-center justify-center bg-gradient-to-b from-[#2c2c30] to-[#1d1d20] text-white before:shadow-[0px_2px_0.4px_0px_rgba(255,_255,_255,_0.16)_inset] before:pointer-events-none before:absolute before:inset-0 before:rounded-xl"
+                >
+                  <span>Dashboard</span>
+                </Link>
+              </div>
+            )}
 
             {/* Mobile Menu Button */}
             <button 
@@ -314,18 +345,29 @@ export function NavigationBar() {
           </Link>
         </ul>
         <div className="text-standard font-matter fixed bottom-0 mx-auto flex w-full flex-col items-center justify-center gap-4 bg-[transparent] px-4 py-6 md:pb-12">
-          <p>
-            Existing customer?{" "}
-            <Link href="/signin" className="font-bold">
-              Login
+          {!isAuthenticated ? (
+            <>
+              <p>
+                Existing customer?{" "}
+                <Link href="/auth/signin" className="font-bold">
+                  Login
+                </Link>
+              </p>
+              <Link
+                href="/auth/signup"
+                className="px-3 py-2 font-medium relative border border-[transparent] dark:text-black bg-neutral-900 dark:bg-white hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-neutral-900 hover:opacity-90 transition-all duration-150 ease-in-out flex !h-20 w-full max-w-lg items-center justify-center overflow-hidden rounded-xl text-center text-xl bg-gradient-to-b from-[#2c2c30] to-[#1d1d20] text-white before:pointer-events-none before:absolute before:inset-0 before:rounded-xl before:shadow-[0px_2px_0.4px_0px_rgba(255,_255,_255,_0.16)_inset]"
+              >
+                Get started
+              </Link>
+            </>
+          ) : (
+            <Link
+              href="/sheets"
+              className="px-3 py-2 font-medium relative border border-[transparent] dark:text-black bg-neutral-900 dark:bg-white hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-neutral-900 hover:opacity-90 transition-all duration-150 ease-in-out flex !h-20 w-full max-w-lg items-center justify-center overflow-hidden rounded-xl text-center text-xl bg-gradient-to-b from-[#2c2c30] to-[#1d1d20] text-white before:pointer-events-none before:absolute before:inset-0 before:rounded-xl before:shadow-[0px_2px_0.4px_0px_rgba(255,_255,_255,_0.16)_inset]"
+            >
+              Dashboard
             </Link>
-          </p>
-          <Link
-            href="/sheets"
-            className="px-3 py-2 font-medium relative border border-[transparent] dark:text-black bg-neutral-900 dark:bg-white hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-neutral-900 hover:opacity-90 transition-all duration-150 ease-in-out flex !h-20 w-full max-w-lg items-center justify-center overflow-hidden rounded-xl text-center text-xl bg-gradient-to-b from-[#2c2c30] to-[#1d1d20] text-white before:pointer-events-none before:absolute before:inset-0 before:rounded-xl before:shadow-[0px_2px_0.4px_0px_rgba(255,_255,_255,_0.16)_inset]"
-          >
-            Get started
-          </Link>
+          )}
         </div>
       </div>
     </div>
