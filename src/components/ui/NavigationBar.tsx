@@ -131,41 +131,41 @@ export function NavigationBar() {
                   onMouseEnter={() => setActiveDropdown('features')}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
-                  <button className="group flex items-start px-7 pt-0.5 antialiased mix-blend-difference header_blend-layer cursor-pointer transition-opacity hover:opacity-80 font-semibold text-gray-700">
+                  <button className="group flex items-center gap-1 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">
                     Features
-                    <div className="flex h-6 origin-center items-center justify-center transition-transform duration-200 group-hover:-scale-y-100">
-                      <ChevronDown className="ml-0.5 mt-px h-[18px] w-[18px] stroke-2" />
-                    </div>
+                    <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180" />
                   </button>
-                  <div className={`absolute top-full left-0 mt-1 w-[520px] bg-white rounded-xl shadow-lg border border-gray-200 p-6 transition-all duration-200 ${
+                  <div className={`absolute left-1/2 top-full -translate-x-1/2 pt-3 transition-all duration-200 ${
                     activeDropdown === 'features' ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1 pointer-events-none'
                   }`}>
-                    <div className="grid grid-cols-2 gap-6">
-                      {dropdownContent.features.sections.map((section, idx) => (
-                        <div key={idx}>
-                          <h3 className="text-base font-bold text-gray-900 mb-3">{section.title}</h3>
-                          <div className="space-y-2">
-                            {section.items.map((item, itemIdx) => {
-                              const Icon = item.icon
-                              return (
-                                <Link 
-                                  href="#" 
-                                  key={itemIdx}
-                                  className="group flex flex-col rounded-lg p-3 hover:bg-gray-50 transition-colors"
-                                >
-                                  <div className="flex items-center gap-3 mb-1">
-                                    <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-white transition-colors">
-                                      <Icon className="w-4 h-4 stroke-[1.5]" />
+                    <div className="w-screen max-w-[850px] overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg">
+                      <div className="grid grid-cols-2 gap-8">
+                        {dropdownContent.features.sections.map((section, idx) => (
+                          <div key={idx} className="flex flex-col">
+                            <h3 className="mb-4 text-sm font-cal text-gray-500 uppercase tracking-wider">{section.title}</h3>
+                            <div className="space-y-1">
+                              {section.items.map((item, itemIdx) => {
+                                const Icon = item.icon
+                                return (
+                                  <Link 
+                                    href="#" 
+                                    key={itemIdx}
+                                    className="group flex items-start gap-3 rounded-lg p-3 hover:bg-gray-50 transition-colors"
+                                  >
+                                    <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white group-hover:shadow-sm transition-all">
+                                      <Icon className="h-4 w-4 text-gray-600" />
                                     </div>
-                                    <div className="font-semibold text-gray-900">{item.name}</div>
-                                  </div>
-                                  <div className="text-sm text-gray-600 ml-11">{item.description}</div>
-                                </Link>
-                              )
-                            })}
+                                    <div>
+                                      <div className="font-cal text-[15px] text-gray-900">{item.name}</div>
+                                      <div className="font-matter text-sm text-gray-500">{item.description}</div>
+                                    </div>
+                                  </Link>
+                                )
+                              })}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </li>
@@ -174,41 +174,41 @@ export function NavigationBar() {
                   onMouseEnter={() => setActiveDropdown('solutions')}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
-                  <button className="group flex items-start px-7 pt-0.5 antialiased mix-blend-difference header_blend-layer cursor-pointer transition-opacity hover:opacity-80 font-semibold text-gray-700">
+                  <button className="group flex items-center gap-1 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">
                     Solutions
-                    <div className="flex h-6 origin-center items-center justify-center transition-transform duration-200 group-hover:-scale-y-100">
-                      <ChevronDown className="ml-0.5 mt-px h-[18px] w-[18px] stroke-2" />
-                    </div>
+                    <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180" />
                   </button>
-                  <div className={`absolute top-full left-0 mt-1 w-[520px] bg-white rounded-xl shadow-lg border border-gray-200 p-6 transition-all duration-200 ${
+                  <div className={`absolute left-1/2 top-full -translate-x-1/2 pt-3 transition-all duration-200 ${
                     activeDropdown === 'solutions' ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1 pointer-events-none'
                   }`}>
-                    <div className="grid grid-cols-2 gap-6">
-                      {dropdownContent.solutions.sections.map((section, idx) => (
-                        <div key={idx}>
-                          <h3 className="text-base font-bold text-gray-900 mb-3">{section.title}</h3>
-                          <div className="space-y-2">
-                            {section.items.map((item, itemIdx) => {
-                              const Icon = item.icon
-                              return (
-                                <Link 
-                                  href="#" 
-                                  key={itemIdx}
-                                  className="group flex flex-col rounded-lg p-3 hover:bg-gray-50 transition-colors"
-                                >
-                                  <div className="flex items-center gap-3 mb-1">
-                                    <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-white transition-colors">
-                                      <Icon className="w-4 h-4 stroke-[1.5]" />
+                    <div className="w-screen max-w-[850px] overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg">
+                      <div className="grid grid-cols-2 gap-8">
+                        {dropdownContent.solutions.sections.map((section, idx) => (
+                          <div key={idx} className="flex flex-col">
+                            <h3 className="mb-4 text-sm font-cal text-gray-500 uppercase tracking-wider">{section.title}</h3>
+                            <div className="space-y-1">
+                              {section.items.map((item, itemIdx) => {
+                                const Icon = item.icon
+                                return (
+                                  <Link 
+                                    href="#" 
+                                    key={itemIdx}
+                                    className="group flex items-start gap-3 rounded-lg p-3 hover:bg-gray-50 transition-colors"
+                                  >
+                                    <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white group-hover:shadow-sm transition-all">
+                                      <Icon className="h-4 w-4 text-gray-600" />
                                     </div>
-                                    <div className="font-semibold text-gray-900">{item.name}</div>
-                                  </div>
-                                  <div className="text-sm text-gray-600 ml-11">{item.description}</div>
-                                </Link>
-                              )
-                            })}
+                                    <div>
+                                      <div className="font-cal text-[15px] text-gray-900">{item.name}</div>
+                                      <div className="font-matter text-sm text-gray-500">{item.description}</div>
+                                    </div>
+                                  </Link>
+                                )
+                              })}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </li>
@@ -217,41 +217,41 @@ export function NavigationBar() {
                   onMouseEnter={() => setActiveDropdown('integrations')}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
-                  <button className="group flex items-start px-7 pt-0.5 antialiased mix-blend-difference header_blend-layer cursor-pointer transition-opacity hover:opacity-80 font-semibold text-gray-700">
+                  <button className="group flex items-center gap-1 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">
                     Integrations
-                    <div className="flex h-6 origin-center items-center justify-center transition-transform duration-200 group-hover:-scale-y-100">
-                      <ChevronDown className="ml-0.5 mt-px h-[18px] w-[18px] stroke-2" />
-                    </div>
+                    <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180" />
                   </button>
-                  <div className={`absolute top-full left-0 mt-1 w-[520px] bg-white rounded-xl shadow-lg border border-gray-200 p-6 transition-all duration-200 ${
+                  <div className={`absolute left-1/2 top-full -translate-x-1/2 pt-3 transition-all duration-200 ${
                     activeDropdown === 'integrations' ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1 pointer-events-none'
                   }`}>
-                    <div className="grid grid-cols-2 gap-6">
-                      {dropdownContent.integrations.sections.map((section, idx) => (
-                        <div key={idx}>
-                          <h3 className="text-base font-bold text-gray-900 mb-3">{section.title}</h3>
-                          <div className="space-y-2">
-                            {section.items.map((item, itemIdx) => {
-                              const Icon = item.icon
-                              return (
-                                <Link 
-                                  href="#" 
-                                  key={itemIdx}
-                                  className="group flex flex-col rounded-lg p-3 hover:bg-gray-50 transition-colors"
-                                >
-                                  <div className="flex items-center gap-3 mb-1">
-                                    <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-white transition-colors">
-                                      <Icon className="w-4 h-4 stroke-[1.5]" />
+                    <div className="w-screen max-w-[850px] overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg">
+                      <div className="grid grid-cols-2 gap-8">
+                        {dropdownContent.integrations.sections.map((section, idx) => (
+                          <div key={idx} className="flex flex-col">
+                            <h3 className="mb-4 text-sm font-cal text-gray-500 uppercase tracking-wider">{section.title}</h3>
+                            <div className="space-y-1">
+                              {section.items.map((item, itemIdx) => {
+                                const Icon = item.icon
+                                return (
+                                  <Link 
+                                    href="#" 
+                                    key={itemIdx}
+                                    className="group flex items-start gap-3 rounded-lg p-3 hover:bg-gray-50 transition-colors"
+                                  >
+                                    <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white group-hover:shadow-sm transition-all">
+                                      <Icon className="h-4 w-4 text-gray-600" />
                                     </div>
-                                    <div className="font-semibold text-gray-900">{item.name}</div>
-                                  </div>
-                                  <div className="text-sm text-gray-600 ml-11">{item.description}</div>
-                                </Link>
-                              )
-                            })}
+                                    <div>
+                                      <div className="font-cal text-[15px] text-gray-900">{item.name}</div>
+                                      <div className="font-matter text-sm text-gray-500">{item.description}</div>
+                                    </div>
+                                  </Link>
+                                )
+                              })}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </li>
