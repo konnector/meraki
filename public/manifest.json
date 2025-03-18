@@ -1,0 +1,13 @@
+{
+  "name": "Meraki.ai",
+  "short_name": "Meraki",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "32x32"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone"
+} 

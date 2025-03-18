@@ -3,14 +3,13 @@
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import { FileSpreadsheet } from "lucide-react";
-import Link from "next/link";
 
 const templates = [
-  { id: "blank", name: "Blank spreadsheet", icon: <FileSpreadsheet className="h-12 w-12 text-primary/60" /> },
-  { id: "todo", name: "To-do list", icon: <FileSpreadsheet className="h-12 w-12 text-emerald-500/60" /> },
-  { id: "budget", name: "Annual budget", icon: <FileSpreadsheet className="h-12 w-12 text-orange-500/60" /> },
-  { id: "monthly-budget", name: "Monthly budget", icon: <FileSpreadsheet className="h-12 w-12 text-blue-500/60" /> },
-  { id: "investment", name: "Investment tracker", icon: <FileSpreadsheet className="h-12 w-12 text-violet-500/60" /> },
+  { id: "blank", name: "Blank spreadsheet", icon: <FileSpreadsheet className="h-12 w-12 text-black/60" /> },
+  { id: "todo", name: "To-do list", icon: <FileSpreadsheet className="h-12 w-12 text-gray-700/60" /> },
+  { id: "budget", name: "Annual budget", icon: <FileSpreadsheet className="h-12 w-12 text-gray-800/60" /> },
+  { id: "monthly-budget", name: "Monthly budget", icon: <FileSpreadsheet className="h-12 w-12 text-gray-900/60" /> },
+  { id: "investment", name: "Investment tracker", icon: <FileSpreadsheet className="h-12 w-12 text-black/60" /> },
 ];
 
 export default function TemplatesSection() {
@@ -69,30 +68,19 @@ export default function TemplatesSection() {
   };
 
   return (
-    <div className="mb-12">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-medium">Start a new spreadsheet</h2>
-        <Link 
-          href="/templates" 
-          className="text-sm text-primary hover:text-primary/90 transition-colors"
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      {templates.map((template) => (
+        <button
+          key={template.id}
+          onClick={() => handleCreateSpreadsheet(template.id)}
+          className="group aspect-[4/3] rounded-lg border border-gray-200 hover:border-black/50 transition-colors p-4 flex flex-col items-center justify-center gap-2 bg-white hover:bg-gray-50"
         >
-          Template gallery
-        </Link>
-      </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {templates.map((template) => (
-          <button
-            key={template.id}
-            onClick={() => handleCreateSpreadsheet(template.id)}
-            className="group aspect-[4/3] rounded-lg border border-border hover:border-primary/50 transition-colors p-4 flex flex-col items-center justify-center gap-2 bg-card hover:bg-accent"
-          >
-            {template.icon}
-            <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">
-              {template.name}
-            </span>
-          </button>
-        ))}
-      </div>
+          {template.icon}
+          <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+            {template.name}
+          </span>
+        </button>
+      ))}
     </div>
   );
 } 

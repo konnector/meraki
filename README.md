@@ -1,6 +1,87 @@
 # Meraki Sheets
 
-A modern, elegant spreadsheet application built with Next.js and Tailwind CSS. Meraki Sheets offers a powerful yet intuitive interface for managing and analyzing data, similar to Google Sheets but with a minimalist black and white design aesthetic.
+A modern, collaborative sheet editing application built with Next.js, React, and Supabase.
+
+## Project Structure
+
+```
+/
+├── src/                  # Source directory 
+│   ├── app/              # Next.js app directory (routes)
+│   │   ├── auth/         # Authentication routes
+│   │   ├── dashboard/    # Dashboard routes
+│   │   ├── sheets/       # Sheets routes
+│   │   └── layout.tsx    # Root layout
+│   │
+│   ├── components/       # React components
+│   │   ├── ui/           # Reusable UI components
+│   │   │   ├── buttons/  # Button components
+│   │   │   ├── cards/    # Card components
+│   │   │   ├── forms/    # Form components
+│   │   │   └── layout/   # Layout components
+│   │   ├── features/     # Feature-specific components
+│   │   │   ├── auth/     # Authentication components
+│   │   │   ├── sheets/   # Sheet-related components
+│   │   │   └── dashboard/# Dashboard components
+│   │   └── shared/       # Shared components
+│   │
+│   ├── lib/              # Utility functions and hooks
+│   │   ├── sheets.ts     # Sheet operations
+│   │   ├── supabase.ts   # Supabase client
+│   │   └── utils.ts      # Utility functions
+│   │
+│   └── types/            # TypeScript type definitions
+│       ├── database.types.ts # Database types
+│       └── supabase.ts   # Supabase types
+│
+├── public/               # Static files
+└── supabase/             # Supabase configuration
+    └── migrations/       # Database migrations
+```
+
+## Component Naming Conventions
+
+- Use PascalCase for component files
+- Prefix components with their type:
+  - `Button` - ButtonPrimary.tsx, ButtonSecondary.tsx
+  - `Card` - CardSheet.tsx, CardAnalytics.tsx
+  - `Form` - FormLogin.tsx, FormCreateSheet.tsx
+
+## Development
+
+1. Install dependencies:
+```bash
+npm install
+```
+
+2. Set up environment variables:
+```bash
+cp .env.example .env.local
+```
+
+3. Start the development server:
+```bash
+npm run dev
+```
+
+## Features
+
+- Modern UI with Tailwind CSS and DaisyUI
+- Real-time collaboration
+- Authentication with Supabase
+- Responsive design
+- Auto-saving
+- Version history
+
+## Best Practices
+
+- Use Server Components by default
+- Add 'use client' directive only when needed
+- Follow TypeScript best practices
+- Implement proper error boundaries
+- Use proper loading states
+- Implement proper form validation
+- Follow accessibility guidelines
 
 ## Core Features
 

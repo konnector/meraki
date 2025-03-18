@@ -21,4 +21,12 @@ export function validatePassword(password: string) {
 export function getErrorMessage(error: unknown) {
   if (error instanceof Error) return error.message;
   return String(error);
-} 
+}
+
+export function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export function generateId() {
+  return Math.random().toString(36).substring(2, 9);
+}

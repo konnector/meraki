@@ -10,12 +10,14 @@ import { evaluateFormula } from './formulas';
 import { handleKeyboardShortcut } from './keyboardShortcuts';
 import { AnimatedList } from '../magicui/animated-list';
 import { ClipboardIcon, DocumentDuplicateIcon as ClipboardCopyIcon, ArrowUturnLeftIcon as UndoIcon, ArrowUturnRightIcon as RedoIcon } from '@heroicons/react/24/outline';
+import { MessageLoading } from "@/components/ui/message-loading";
 
 const DEFAULT_ROWS = 100;
 const DEFAULT_COLS = 26;
 
 interface SpreadsheetProps {
   sheetId: string;
+  isTemp?: boolean;
 }
 
 type Notification = {
@@ -41,7 +43,7 @@ const formatTimeAgo = (timestamp: number) => {
   }
 };
 
-export default function Spreadsheet({ sheetId }: SpreadsheetProps) {
+export default function Spreadsheet({ sheetId, isTemp = false }: SpreadsheetProps) {
   const supabase = createClientComponentClient();
   const [data, setData] = useState<Record<string, CellData>>({});
   const [selectedCell, setSelectedCell] = useState<CellPosition | null>(null);
@@ -63,11 +65,26 @@ export default function Spreadsheet({ sheetId }: SpreadsheetProps) {
     cells: Record<string, CellData>;
   } | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [hasModifications, setHasModifications] = useState(false);
+
+  // Define addNotification before it's used
+  const addNotification = useCallback((message: string) => {
+    const id = Math.random().toString(36).substring(7);
+    const notification = { id, message, timestamp: Date.now() };
+    setNotifications(prev => [notification, ...prev]);
+    
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+      setNotifications(prev => prev.filter(n => n.id !== id));
+    }, 3000);
+  }, []);
 
   // Load sheet data
   useEffect(() => {
     const loadSheetData = async () => {
       try {
+        setIsLoading(true);
+        
         // Load sheet metadata
         const { data: sheet, error: sheetError } = await supabase
           .from('sheets')
@@ -75,64 +92,180 @@ export default function Spreadsheet({ sheetId }: SpreadsheetProps) {
           .eq('id', sheetId)
           .single();
 
-        if (sheetError) throw sheetError;
+        if (sheetError) {
+          console.error('Error loading sheet metadata:', sheetError);
+          // Don't redirect for PGRST116 (not found) error if we're going to create on the fly
+          if (sheetError.code === 'PGRST116') {
+            // Sheet might be getting created at the same time in [id]/page.tsx
+            // Reload the page once after a short delay
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+            return;
+          }
+          
+          // For other errors, show a notification but don't redirect
+          addNotification('Error loading sheet data');
+          setIsLoading(false);
+          return;
+        }
+        
         if (sheet) {
           setTitle(sheet.title);
+        } else {
+          // Sheet doesn't exist but we shouldn't redirect
+          // It might be getting created on the server
+          console.error('No sheet found with id:', sheetId);
+          setTitle('Untitled Spreadsheet');
+          setIsLoading(false);
+          return;
         }
 
-        // Load sheet data
-        const { data: cellData, error: dataError } = await supabase
-          .from('sheet_data')
-          .select('*')
-          .eq('sheet_id', sheetId);
+        try {
+          // Load sheet data
+          const { data: cellData, error: dataError } = await supabase
+            .from('sheet_data')
+            .select('*')
+            .eq('sheet_id', sheetId);
 
-        if (dataError) throw dataError;
+          if (dataError) {
+            console.error('Error in loadSheetData:', dataError);
+            // Don't throw here - we can continue with empty data
+            addNotification('Starting with empty sheet');
+          }
 
-        // Convert array of cell data to our data format
-        const newData: Record<string, CellData> = {};
-        cellData?.forEach(cell => {
-          const key = getCellKey(cell.row_index, cell.col_index);
-          newData[key] = {
-            value: cell.cell_value || '',
-            type: cell.cell_type || 'text'
-          };
-        });
-
-        setData(newData);
-        setHistory([newData]);
-        setHistoryIndex(0);
-      } catch (error) {
-        console.error('Error loading sheet:', error);
-        addNotification('Error loading sheet');
+          if (cellData && cellData.length > 0) {
+            const newData: Record<string, CellData> = {};
+            
+            // Process cell data
+            cellData.forEach((cell) => {
+              if (cell.cell_key !== 'metadata' && cell.data) {
+                newData[cell.cell_key] = cell.data as CellData;
+              }
+            });
+            
+            setData(newData);
+            
+            // Add to history
+            setHistory([newData]);
+            setHistoryIndex(0);
+          }
+          
+          // Handle column and row sizes
+          try {
+            const { data: colSizes, error: colError } = await supabase
+              .from('column_sizes')
+              .select('*')
+              .eq('sheet_id', sheetId);
+              
+            if (!colError && colSizes) {
+              setColumnSizes(colSizes.map(cs => ({ index: cs.column_index, width: cs.width })));
+            } else if (colError) {
+              console.error('Error loading column sizes:', colError);
+            }
+          } catch (err) {
+            console.error('Error loading column sizes:', err);
+          }
+          
+          try {
+            const { data: rowSizes, error: rowError } = await supabase
+              .from('row_sizes')
+              .select('*')
+              .eq('sheet_id', sheetId);
+              
+            if (!rowError && rowSizes) {
+              setRowSizes(rowSizes.map(rs => ({ index: rs.row_index, height: rs.height })));
+            } else if (rowError) {
+              console.error('Error loading row sizes:', rowError);
+            }
+          } catch (err) {
+            console.error('Error loading row sizes:', err);
+          }
+        } catch (e) {
+          console.error('Error in data loading section:', e);
+          // Continue with empty data
+          addNotification('Starting with empty sheet');
+        }
+      } catch (e) {
+        console.error('Error in loadSheetData:', e);
+        addNotification('Error loading spreadsheet');
       } finally {
         setIsLoading(false);
       }
     };
 
     loadSheetData();
-  }, [sheetId, supabase]);
+  }, [sheetId, supabase, addNotification]);
 
-  // Save changes to database
+  // Save changes to the database
   const saveChanges = useCallback(async (key: string, cellData: CellData) => {
-    const [row, col] = key.split(',').map(Number);
-    
     try {
-      const { error } = await supabase
+      // First mark the sheet as non-temporary if it was temporary
+      if (isTemp && hasModifications) {
+        const { error: updateError } = await supabase
+          .from('sheets')
+          .update({ is_temporary: false })
+          .eq('id', sheetId);
+          
+        if (updateError) {
+          console.error('Error updating sheet temporary status:', updateError);
+        }
+      }
+      
+      // Check if the cell data already exists
+      const { data: existingData, error: getError } = await supabase
         .from('sheet_data')
-        .upsert({
-          sheet_id: sheetId,
-          row_index: row,
-          col_index: col,
-          cell_value: cellData.value,
-          cell_type: cellData.type || 'text'
-        });
+        .select('*')
+        .eq('sheet_id', sheetId)
+        .eq('cell_key', key)
+        .maybeSingle();
+      
+      // Exit early if there was an error checking existing data
+      if (getError) {
+        console.error('Error checking existing cell data:', getError);
+        return;
+      }
+      
+      let error;
+      
+      // Update the updated_at timestamp
+      const { error: metaError } = await supabase
+        .from('sheets')
+        .update({ updated_at: new Date().toISOString() })
+        .eq('id', sheetId);
+        
+      if (metaError) {
+        console.error('Error updating sheet timestamp:', metaError);
+      }
+        
+      if (existingData) {
+        // Update existing cell data
+        const { error: updateError } = await supabase
+          .from('sheet_data')
+          .update({ data: cellData })
+          .eq('sheet_id', sheetId)
+          .eq('cell_key', key);
+          
+        error = updateError;
+      } else {
+        // Insert new cell data
+        const { error: insertError } = await supabase
+          .from('sheet_data')
+          .insert({
+            sheet_id: sheetId,
+            cell_key: key,
+            data: cellData
+          });
+          
+        error = insertError;
+      }
 
       if (error) throw error;
     } catch (error) {
       console.error('Error saving cell:', error);
       addNotification('Error saving changes');
     }
-  }, [sheetId, supabase]);
+  }, [sheetId, supabase, addNotification, isTemp, hasModifications]);
 
   // Update the updateCellData function to save to database
   const updateCellData = useCallback((row: number, col: number, cellData: Partial<CellData>) => {
@@ -148,6 +281,7 @@ export default function Spreadsheet({ sheetId }: SpreadsheetProps) {
 
     // Update data
     setData(newDataState);
+    setHasModifications(true);
 
     // Add to history
     const newHistory = history.slice(0, historyIndex + 1);
@@ -170,17 +304,6 @@ export default function Spreadsheet({ sheetId }: SpreadsheetProps) {
     const key = getCellKey(row, col);
     return data[key] || { value: '' };
   };
-
-  const addNotification = useCallback((message: string) => {
-    const id = Math.random().toString(36).substring(7);
-    const notification = { id, message, timestamp: Date.now() };
-    setNotifications(prev => [notification, ...prev]);
-    
-    // Remove notification after 3 seconds
-    setTimeout(() => {
-      setNotifications(prev => prev.filter(n => n.id !== id));
-    }, 3000);
-  }, []);
 
   // Update handlers to include notifications
   const handleUndo = useCallback(() => {
@@ -536,24 +659,93 @@ export default function Spreadsheet({ sheetId }: SpreadsheetProps) {
     try {
       const { error } = await supabase
         .from('sheets')
-        .update({ title: newTitle })
+        .update({ 
+          title: newTitle,
+          is_temporary: false // Once titled, it's no longer temporary
+        })
         .eq('id', sheetId);
 
       if (error) throw error;
+      
       setTitle(newTitle);
-      addNotification('Sheet name updated');
+      setHasModifications(true);
+      addNotification('Title updated');
     } catch (error) {
-      console.error('Error updating sheet title:', error);
-      addNotification('Error updating sheet name');
+      console.error('Error updating title:', error);
+      addNotification('Error updating title');
     }
   };
 
+  // Add cleanup effect for temporary sheets
+  useEffect(() => {
+    // We'll use a visit counter to track if the sheet was actually used
+    const visitKey = `sheet_visit_${sheetId}`;
+    
+    // Check if this is the first visit to this sheet
+    const isFirstVisit = !localStorage.getItem(visitKey);
+    
+    // Mark this sheet as visited
+    if (isFirstVisit) {
+      localStorage.setItem(visitKey, 'visited');
+    }
+    
+    // Only add cleanup logic after the sheet is fully loaded
+    // This prevents cleanup on the initial load
+    if (isLoading) {
+      return;
+    }
+    
+    const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
+      if (isTemp && !hasModifications) {
+        // Don't delete on the first page load/rendering
+        if (isFirstVisit) {
+          return;
+        }
+        
+        // Delete the sheet if it's temporary and has no modifications
+        await supabase
+          .from('sheets')
+          .delete()
+          .eq('id', sheetId);
+          
+        // Clean up the localStorage item
+        localStorage.removeItem(visitKey);
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      
+      // Only delete on unmount if not the first visit and no modifications
+      if (isTemp && !hasModifications && !isFirstVisit) {
+        const cleanup = async () => {
+          try {
+            await supabase
+              .from('sheets')
+              .delete()
+              .eq('id', sheetId);
+            console.log('Temporary sheet deleted');
+            
+            // Clean up the localStorage item
+            localStorage.removeItem(visitKey);
+          } catch (error) {
+            console.error('Error deleting temporary sheet:', error);
+          }
+        };
+        void cleanup();
+      }
+    };
+  }, [isTemp, hasModifications, sheetId, supabase, isLoading]);
+
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          <p className="mt-4 text-gray-600">Loading spreadsheet...</p>
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <div className="text-center space-y-4">
+          <div className="h-12 w-12 text-black mx-auto">
+            <MessageLoading />
+          </div>
+          <p className="text-sm text-gray-600">Loading spreadsheet...</p>
         </div>
       </div>
     );

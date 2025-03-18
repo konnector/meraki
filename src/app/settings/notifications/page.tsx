@@ -93,7 +93,7 @@ export default function NotificationsPage() {
   return (
     <div className="max-w-4xl">
       <div>
-        <h2 className="text-lg font-medium text-gray-900">Notification Settings</h2>
+        <h2 className="text-lg font-medium text-black">Notification Settings</h2>
         <p className="mt-1 text-sm text-gray-500">
           Choose how and when you want to be notified.
         </p>
@@ -101,19 +101,19 @@ export default function NotificationsPage() {
 
       {/* Notification Channels */}
       <div className="mt-8">
-        <h3 className="text-sm font-medium text-gray-900">Notification Channels</h3>
+        <h3 className="text-sm font-medium text-black">Notification Channels</h3>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           {channels.map((channel) => (
             <div
               key={channel.id}
-              className="flex items-center justify-between rounded-lg border p-4"
+              className="flex items-center justify-between rounded-lg border border-gray-200 p-4 bg-white"
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 text-black">
                   {channel.icon}
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-900">{channel.title}</h4>
+                  <h4 className="text-sm font-medium text-black">{channel.title}</h4>
                   <p className="text-sm text-gray-500">{channel.description}</p>
                 </div>
               </div>
@@ -122,7 +122,7 @@ export default function NotificationsPage() {
                   type="checkbox"
                   checked={channel.enabled}
                   onChange={() => toggleChannel(channel.id)}
-                  className="toggle toggle-primary"
+                  className="toggle toggle-black"
                 />
               </div>
             </div>

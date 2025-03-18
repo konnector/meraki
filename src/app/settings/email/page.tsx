@@ -54,7 +54,7 @@ export default function EmailPage() {
   return (
     <div className="max-w-3xl">
       <div>
-        <h2 className="text-lg font-medium text-gray-900">Email Preferences</h2>
+        <h2 className="text-lg font-medium text-black">Email Preferences</h2>
         <p className="mt-1 text-sm text-gray-500">
           Manage how and when you receive email notifications.
         </p>
@@ -71,11 +71,11 @@ export default function EmailPage() {
                   type="checkbox"
                   checked={preference.checked}
                   onChange={() => togglePreference(preference.id)}
-                  className="checkbox"
+                  className="checkbox checkbox-black"
                 />
               </div>
               <div className="ml-3">
-                <label htmlFor={preference.id} className="text-sm font-medium text-gray-900">
+                <label htmlFor={preference.id} className="text-sm font-medium text-black">
                   {preference.title}
                 </label>
                 <p className="text-sm text-gray-500">{preference.description}</p>
@@ -86,9 +86,9 @@ export default function EmailPage() {
       </div>
 
       <div className="mt-8">
-        <h3 className="text-sm font-medium text-gray-900">Email Frequency</h3>
+        <h3 className="text-sm font-medium text-black">Email Frequency</h3>
         <div className="mt-4">
-          <select className="select select-bordered w-full max-w-xs">
+          <select className="select select-bordered border-gray-200 w-full max-w-xs">
             <option value="instant">Send emails instantly</option>
             <option value="daily">Daily digest</option>
             <option value="weekly">Weekly digest</option>
@@ -98,7 +98,7 @@ export default function EmailPage() {
       </div>
 
       <div className="mt-8">
-        <h3 className="text-sm font-medium text-gray-900">Additional Email Addresses</h3>
+        <h3 className="text-sm font-medium text-black">Additional Email Addresses</h3>
         <p className="mt-1 text-sm text-gray-500">
           Add additional email addresses to receive notifications.
         </p>
@@ -106,17 +106,17 @@ export default function EmailPage() {
           <input
             type="email"
             placeholder="Enter an email address"
-            className="input input-bordered w-full max-w-md"
+            className="input input-bordered border-gray-200 w-full max-w-md"
           />
-          <button className="btn btn-primary mt-2">
+          <button className="btn bg-black text-white hover:bg-black/90 mt-2">
             Add email
           </button>
         </div>
       </div>
 
       <div className="mt-8 flex items-center justify-end gap-4">
-        <button className="btn btn-ghost">Cancel</button>
-        <button className="btn btn-primary">Save changes</button>
+        <button className="btn bg-white text-gray-700 hover:bg-gray-100 border-gray-200">Cancel</button>
+        <button className="btn bg-black text-white hover:bg-black/90">Save changes</button>
       </div>
     </div>
   );

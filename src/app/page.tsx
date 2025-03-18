@@ -12,6 +12,14 @@ import { CTASection } from '@/components/ui/CTASection'
 export const metadata: Metadata = {
   title: 'Meraki Sheets - Modern Online Spreadsheet',
   description: 'Transform your data with Meraki Sheets - A powerful online spreadsheet that makes collaboration seamless',
+  icons: {
+    icon: [
+      {
+        url: '/icon.svg',
+        type: 'image/svg+xml',
+      }
+    ],
+  }
 }
 
 export default function Home() {
