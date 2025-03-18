@@ -65,15 +65,10 @@ export default function SettingsPage() {
           const profile = await getUserProfile();
           
           if (profile) {
-            // Use a type safe approach to split the name
-            let firstName = '';
-            let lastName = '';
-            
-            if (profile.full_name && typeof profile.full_name === 'string') {
-              const nameParts = profile.full_name.split(' ');
-              firstName = nameParts[0] || '';
-              lastName = nameParts.slice(1).join(' ') || '';
-            }
+            // Split full name into first and last name
+            const nameParts = profile.full_name ? profile.full_name.split(' ') : ['', ''];
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.slice(1).join(' ') || '';
             
             setPersonalInfo(prev => ({
               ...prev,

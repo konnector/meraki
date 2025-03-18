@@ -160,7 +160,7 @@ export async function updateUserMetadata(metadata: Record<string, any>) {
   return data
 }
 
-export async function getUserProfile() {
+export async function getUserProfile(): Promise<Profile | null> {
   const supabase = getSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   
@@ -173,7 +173,13 @@ export async function getUserProfile() {
     .eq('id', user.id)
     .single()
   
-  if (error) throw error
+  if (error) {
+    if (error.code === 'PGRST116') {
+      // No profile found
+      return null
+    }
+    throw error
+  }
   
-  return data
+  return data as Profile
 } 
