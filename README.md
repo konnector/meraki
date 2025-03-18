@@ -1,43 +1,36 @@
 # Meraki Sheets
 
-A feature-rich web-based spreadsheet application built with Next.js and Tailwind CSS, offering functionality similar to Google Sheets.
+A modern, elegant spreadsheet application built with Next.js and Tailwind CSS. Meraki Sheets offers a powerful yet intuitive interface for managing and analyzing data, similar to Google Sheets but with a minimalist black and white design aesthetic.
 
-## Features
+## Core Features
 
-- Interactive spreadsheet grid with rows and columns
-- Cell formatting (bold, italic, underline, text alignment, font size, font family)
-- Text and background color customization
-- Column and row resizing
-- Cell selection and multi-cell selection
-- Formula support (SUM, AVERAGE, MAX, MIN, COUNT)
-- Keyboard navigation and shortcuts
-- Responsive design
+- **Modern Interface**: Clean, minimalist design with a black, grey, and white color scheme
+- **Real-time Collaboration**: Work together with team members simultaneously
+- **Cloud Storage**: Automatic saving and secure storage with Supabase
+- **Responsive Design**: Works seamlessly across desktop and tablet devices
 
-## Keyboard Shortcuts
+### Spreadsheet Features
+- Interactive spreadsheet grid with customizable rows and columns
+- Advanced cell formatting options
+- Formula support with common functions
+- Keyboard shortcuts for efficient navigation
+- Import/Export functionality
 
-- **Arrow keys**: Navigate cells
-- **Tab / Shift+Tab**: Move right/left
-- **Enter / Shift+Enter**: Move down/up
-- **F2**: Edit the current cell
-- **Ctrl+B**: Toggle bold
-- **Ctrl+I**: Toggle italic
-- **Ctrl+U**: Toggle underline
-- **Home/End**: Move to first/last column in the row
-- **Page Up/Down**: Move 10 rows up/down
+### User Features
+- Secure authentication with Supabase
+- Personal and team workspaces
+- Customizable user and company profiles
+- Role-based access control
+- Email notifications and preferences
 
-## Formula Support
+## Technology Stack
 
-Type formulas starting with `=` in any cell. Supported functions include:
-
-- `=SUM(A1:B3)`: Sum values in range
-- `=AVERAGE(A1:B3)`: Calculate average of values in range
-- `=MAX(A1:B3)`: Find maximum value in range
-- `=MIN(A1:B3)`: Find minimum value in range
-- `=COUNT(A1:B3)`: Count non-empty cells in range
-
-You can also reference cells directly in calculations, for example:
-- `=A1+B1`
-- `=A1*B2+C3`
+- **Frontend**: Next.js 14 with App Router
+- **Styling**: Tailwind CSS with DaisyUI
+- **Database**: Supabase
+- **Authentication**: Supabase Auth
+- **State Management**: React Hooks
+- **Language**: TypeScript
 
 ## Getting Started
 
@@ -45,49 +38,76 @@ You can also reference cells directly in calculations, for example:
 
 - Node.js 18.0 or higher
 - npm or yarn
+- Supabase account
 
 ### Installation
 
-1. Clone the repository
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/meraki-sheets.git
+   cd meraki-sheets
+   ```
+
 2. Install dependencies:
    ```bash
    npm install
    # or
    yarn install
    ```
-3. Start the development server:
+
+3. Set up environment variables:
+   ```bash
+   cp .env.example .env.local
+   ```
+   Fill in your Supabase credentials in `.env.local`
+
+4. Start the development server:
    ```bash
    npm run dev
    # or
    yarn dev
    ```
-4. Open your browser and navigate to `http://localhost:3000`
 
-## Building for Production
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-To create a production build:
+## Keyboard Shortcuts
 
-```bash
-npm run build
-# or
-yarn build
-```
+| Action | Windows/Linux | macOS |
+|--------|--------------|-------|
+| Navigate cells | Arrow keys | Arrow keys |
+| Next cell | Tab | Tab |
+| Previous cell | Shift + Tab | Shift + Tab |
+| Edit cell | F2 | F2 |
+| Format bold | Ctrl + B | ⌘ + B |
+| Format italic | Ctrl + I | ⌘ + I |
+| Format underline | Ctrl + U | ⌘ + U |
 
-To start the production server:
+## Formula Support
 
-```bash
-npm run start
-# or
-yarn start
-```
+Start formulas with `=` in any cell. Supported functions:
 
-## Technology Stack
+- `SUM(range)`: Sum values in range
+- `AVERAGE(range)`: Calculate average
+- `MAX(range)`: Find maximum value
+- `MIN(range)`: Find minimum value
+- `COUNT(range)`: Count non-empty cells
 
-- **Next.js**: React framework for server-side rendering and static site generation
-- **TypeScript**: For type-safe code
-- **Tailwind CSS**: For styling and responsive design
-- **React**: For building the user interface
+Example: `=SUM(A1:B3)` or `=A1+B2*C3`
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
 
 ## License
 
 This project is licensed under the ISC License.
+
+## Acknowledgments
+
+- Next.js team for the amazing framework
+- Supabase team for the backend infrastructure
+- All contributors who help improve Meraki Sheets
