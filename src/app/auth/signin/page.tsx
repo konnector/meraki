@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ButtonAuth } from '@/components/ui/ButtonAuth'
@@ -8,7 +8,7 @@ import { validateEmail } from '@/lib/utils'
 import { signInWithEmail, signInWithGoogle, getSupabaseClient } from '@/lib/supabase'
 import { getErrorMessage } from '@/lib/utils'
 
-export default function SignIn() {
+function SignInForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirectedFrom') || '/sheets'
@@ -171,5 +171,13 @@ export default function SignIn() {
         </Link>
       </p>
     </div>
+  )
+}
+
+export default function SignIn() {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center min-h-screen">Loading...</div>}>
+      <SignInForm />
+    </Suspense>
   )
 } 
