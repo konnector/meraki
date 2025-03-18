@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Settings, UserCircle, Key, Users, CreditCard, Mail, Bell } from 'lucide-react';
@@ -65,7 +66,8 @@ export default function SettingsPage() {
           
           if (profile) {
             // Split full name into first and last name
-            const nameParts = profile.full_name ? profile.full_name.split(' ') : ['', ''];
+            const fullName = profile.full_name as string || '';
+            const nameParts = fullName.split(' ');
             const firstName = nameParts[0] || '';
             const lastName = nameParts.slice(1).join(' ') || '';
             
