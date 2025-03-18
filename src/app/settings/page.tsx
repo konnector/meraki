@@ -6,6 +6,9 @@ const SettingsContent = dynamic(() => import('@/components/settings/SettingsCont
   loading: () => <div className="flex justify-center items-center min-h-screen">Loading...</div>
 });
 
+// Disable static rendering for this page
+export const dynamicMode = 'force-dynamic';
+
 export default function SettingsPage() {
   return <SettingsContent />;
 } 
