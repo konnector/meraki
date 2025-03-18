@@ -1,17 +1,11 @@
-'use client';
-
 import dynamic from 'next/dynamic';
-import SuspenseWrapper from '@/components/SuspenseWrapper';
 
-// Use dynamic import with ssr:false as a fallback if needed
+// Use dynamic import with ssr:false to prevent client-only hooks from running during SSR
 const SettingsContent = dynamic(() => import('@/components/settings/SettingsContent'), { 
-  ssr: true 
+  ssr: false,
+  loading: () => <div className="flex justify-center items-center min-h-screen">Loading...</div>
 });
 
 export default function SettingsPage() {
-  return (
-    <SuspenseWrapper>
-      <SettingsContent />
-    </SuspenseWrapper>
-  );
+  return <SettingsContent />;
 } 
