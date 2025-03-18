@@ -66,7 +66,7 @@ export default function SettingsPage() {
           
           if (profile) {
             // Split full name into first and last name
-            const fullName = profile.full_name as string || '';
+            const fullName = typeof profile.full_name === 'string' ? profile.full_name : '';
             const nameParts = fullName.split(' ');
             const firstName = nameParts[0] || '';
             const lastName = nameParts.slice(1).join(' ') || '';
