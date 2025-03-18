@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ButtonAuth } from '@/components/ui/ButtonAuth'
 import { validatePassword, getErrorMessage } from '@/lib/utils'
 import { updatePassword } from '@/lib/supabase'
 
-export default function ResetPassword() {
+function ResetPasswordForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
@@ -128,5 +128,13 @@ export default function ResetPassword() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function ResetPassword() {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center min-h-screen">Loading...</div>}>
+      <ResetPasswordForm />
+    </Suspense>
   )
 } 
