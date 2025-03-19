@@ -1,10 +1,10 @@
-import dynamic from 'next/dynamic';
+import nextDynamic from 'next/dynamic';
 
 // Disable static rendering for all settings pages
-export const dynamicMode = 'force-dynamic';
+export const dynamic = 'force-dynamic';
 
 // Import client components with SSR disabled
-const SettingsLayoutClient = dynamic(() => import('@/components/settings/SettingsLayoutClient'), {
+const SettingsLayoutClient = nextDynamic(() => import('@/components/settings/SettingsLayoutClient'), {
   ssr: false,
   loading: () => <div className="flex justify-center items-center min-h-screen">Loading...</div>
 });
